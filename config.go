@@ -17,7 +17,7 @@ type Config struct {
 }
 
 const (
-	maxLogFileSize = 100
+	maxLogFileSize = 10 * 1024
 )
 
 func (c *Config) Init() {
