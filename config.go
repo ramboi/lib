@@ -24,9 +24,14 @@ func (c *Config) Init() {
 	c.data = make(map[string]interface{})
 }
 
+var logDirectory = "/opt/bazc/bazcli/log" // lowercase variable
+
+func GetLogDirectory() string {
+	return logDirectory
+}
+
 func OpenLogFile(logFileName string) (*os.File, error) {
-	var LogDirectory = "/opt/bazc/bazcli/log"
-	fullPath := filepath.Join(LogDirectory, logFileName)
+	fullPath := filepath.Join(logDirectory, logFileName)
 	file, err := os.OpenFile(fullPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
