@@ -45,7 +45,7 @@ func OpenLogFile(logFileName string) (*os.File, error) {
 		if err != nil {
 			return nil, err
 		}
-		return rotateLogFile(logFileName)
+		return rotateLogFile(fullPath)
 	}
 	return file, nil
 }
