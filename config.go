@@ -15,6 +15,8 @@ type Config struct {
 	sync.RWMutex
 }
 
+var Directory_path = "/opt/bazc/bazcli/log"
+
 // Definig max file size for logfile.txt to 10KB
 const (
 	maxLogFileSize = 10 * 1024
