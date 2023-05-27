@@ -1,4 +1,3 @@
-// config.go
 package lib
 
 import (
@@ -16,6 +15,7 @@ type Config struct {
 	sync.RWMutex
 }
 
+// Definig max file size for logfile.txt to 10KB
 const (
 	maxLogFileSize = 10 * 1024
 )
@@ -24,26 +24,24 @@ func (c *Config) Init() {
 	c.data = make(map[string]interface{})
 }
 
-func /*(c *Config)*/ OpenLogFile(logFileName string) (*os.File, error) {
-	file, err := os.OpenFile(logFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+var LogDirectory = "/opt/bazc/bazcli/log"
+
+func OpenLogFile(fullPath string) (*os.File, error) {
+	file, err := os.OpenFile(fullPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
 	}
-
 	fileInfo, err := file.Stat()
 	if err != nil {
 		return nil, err
 	}
-
 	if fileInfo.Size() >= maxLogFileSize {
 		err := file.Close()
 		if err != nil {
 			return nil, err
 		}
-
 		return rotateLogFile(logFileName)
 	}
-
 	return file, nil
 }
 
@@ -76,12 +74,11 @@ func (c *Config) Delete(ctx context.Context) {
 	panic("unable to get peer from context.")
 }
 
-func /*(c *Config)*/ rotateLogFile(logFileName string) (*os.File, error) {
+func rotateLogFile(logFileName string) (*os.File, error) {
 	dir, fileName := filepath.Split(logFileName)
 	ext := filepath.Ext(fileName)
 	baseName := fileName[:len(fileName)-len(ext)]
 	timestamp := time.Now().Format("20060102150405")
-
 	newFileName := filepath.Join(dir, baseName+"_"+timestamp+ext)
 
 	// Rename the current log file to the new file name
@@ -98,7 +95,3 @@ func /*(c *Config)*/ rotateLogFile(logFileName string) (*os.File, error) {
 
 	return file, nil
 }
-
-// func Hello() {
-// 	println("heloo")
-// }
