@@ -16,29 +16,29 @@ type Config struct {
 	sync.RWMutex
 }
 
-var Directory_path = "/opt/bazc/bazcli/log"
-
-// Definig max file size for logfile.txt to 10KB
+// Definig max file size for logfile.txt to 1MB
 const (
 	maxLogFileSize = 1 * 1024 * 1024
+	directory_path = "/opt/bazc/bazcli/log"
 )
 
 func (c *Config) Init() {
 	c.data = make(map[string]interface{})
 }
 
-func Log_Init(logFileName string) (*os.File, error) {
-	full_path := filepath.Join(Directory_path, logFileName)
-	file, err := OpenLogFile(full_path)
+func Log_Init(logFileName string) error {
+	filePath := filepath.Join(directory_path, logFileName)
+	file, err := OpenLogFile(filePath)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	log.SetOutput(file)
-	log.Println("Logging start.")
-
+	defer file.Close()
+	return err
 }
+
 func OpenLogFile(logFileName string) (*os.File, error) {
-	file, err := os.OpenFile(logFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(logFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		return nil, err
 	}
@@ -51,9 +51,29 @@ func OpenLogFile(logFileName string) (*os.File, error) {
 		if err != nil {
 			return nil, err
 		}
-		return rotateLogFile(logFileName)
+		rotateLogFile(logFileName)
+
+		file, err = os.OpenFile(logFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return file, nil
+}
+
+func rotateLogFile(logFileName string) error {
+	dir, fileName := filepath.Split(logFileName)
+	ext := filepath.Ext(fileName)
+	baseName := fileName[:len(fileName)-len(ext)]
+	timestamp := time.Now().Format("20060102150405")
+	newFileName := filepath.Join(dir, baseName+"_"+timestamp+ext)
+
+	// Rename the current log file to the new file name
+	err := os.Rename(logFileName, newFileName)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Config) Put(ctx context.Context, value interface{}) {
@@ -83,26 +103,4 @@ func (c *Config) Delete(ctx context.Context) {
 		return
 	}
 	panic("unable to get peer from context.")
-}
-
-func rotateLogFile(logFileName string) (*os.File, error) {
-	dir, fileName := filepath.Split(logFileName)
-	ext := filepath.Ext(fileName)
-	baseName := fileName[:len(fileName)-len(ext)]
-	timestamp := time.Now().Format("20060102150405")
-	newFileName := filepath.Join(dir, baseName+"_"+timestamp+ext)
-
-	// Rename the current log file to the new file name
-	err := os.Rename(logFileName, newFileName)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create a new log file
-	file, err := os.OpenFile(logFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		return nil, err
-	}
-
-	return file, nil
 }
