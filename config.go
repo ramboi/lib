@@ -32,7 +32,7 @@ func GetLogDirectory() string {
 
 func OpenLogFile(logFileName string) (*os.File, error) {
 	//fullPath := filepath.Join(logDirectory, logFileName)
-	file, err := os.OpenFile(fullPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(logFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func OpenLogFile(logFileName string) (*os.File, error) {
 		if err != nil {
 			return nil, err
 		}
-		return rotateLogFile(fullPath)
+		return rotateLogFile(logFileName)
 	}
 	return file, nil
 }
