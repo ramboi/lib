@@ -34,7 +34,7 @@ func Log_Init(logFileName string) error {
 	}
 	log.SetOutput(file)
 	defer file.Close()
-	return err
+	return nil
 }
 
 func OpenLogFile(logFileName string) (*os.File, error) {
