@@ -2,6 +2,7 @@ package lib
 
 import (
 	"context"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -19,13 +20,23 @@ var Directory_path = "/opt/bazc/bazcli/log"
 
 // Definig max file size for logfile.txt to 10KB
 const (
-	maxLogFileSize = 10 * 1024
+	maxLogFileSize = 1 * 1024 * 1024
 )
 
 func (c *Config) Init() {
 	c.data = make(map[string]interface{})
 }
 
+func Log_Init(logFileName string) (*os.File, error) {
+	full_path := filepath.Join(Directory_path, logFileName)
+	file, err := OpenLogFile(full_path)
+	if err != nil {
+		return nil, err
+	}
+	log.SetOutput(file)
+	log.Println("Logging start.")
+
+}
 func OpenLogFile(logFileName string) (*os.File, error) {
 	file, err := os.OpenFile(logFileName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
