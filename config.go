@@ -33,7 +33,6 @@ func Log_Init(logFileName string) error {
 		return err
 	}
 	log.SetOutput(file)
-	defer file.Close()
 	return nil
 }
 
